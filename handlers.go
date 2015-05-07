@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
 )
 
 // List out all the routes.
-func Index(w http.ResponseWriter, r *http.Request) {
+func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprintln(
 		w,
 		"This is yakdb, a highly performant key-value store written in Go.\n\n"+
@@ -28,7 +28,7 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // List all the items in the system.
-func ItemsList(w http.ResponseWriter, r *http.Request) {
+func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
@@ -39,20 +39,18 @@ func ItemsList(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get an item.
-func ItemsGet(w http.ResponseWriter, r *http.Request) {
+func ItemsGet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	vars := mux.Vars(r)
-	id := vars["itemId"]
-	item := FindOneItemById(id)
+	item := FindOneItemById(ps.ByName("itemId"))
 
 	if err := json.NewEncoder(w).Encode(item); err != nil {
 		panic(err)
 	}
 }
 
-func ItemsPut(w http.ResponseWriter, r *http.Request) {
+func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
@@ -87,18 +85,15 @@ func ItemsPut(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ItemsDelete(w http.ResponseWriter, r *http.Request) {
+func ItemsDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
-	vars := mux.Vars(r)
-	id := vars["itemId"]
-
-	result := DeleteOneItemById(id)
+	result := DeleteOneItemById(ps.ByName("itemId"))
 	json.NewEncoder(w).Encode(result)
 }
 
-func ItemsFlush(w http.ResponseWriter, r *http.Request) {
+func ItemsFlush(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 

@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -16,8 +18,14 @@ func main() {
 	flag.Parse()
 	port := strconv.Itoa(portFlag)
 
-	router := NewRouter()
-	fmt.Printf("Listening on port %v...", port)
+	router := httprouter.New()
+	router.GET("/", Index)
+	router.GET("/items", ItemsList)
+	router.GET("/items/:itemId", ItemsGet)
+	router.PUT("/items", ItemsPut)
+	router.DELETE("/items/:itemId", ItemsDelete)
+	router.DELETE("/items", ItemsFlush)
 
+	fmt.Printf("Listening on port %v...", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
 }
