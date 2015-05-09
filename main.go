@@ -20,11 +20,11 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/", Index)
-	router.GET("/items", ItemsList)
-	router.GET("/items/:itemId", ItemsGet)
-	router.PUT("/items", ItemsPut)
-	router.DELETE("/items/:itemId", ItemsDelete)
-	router.DELETE("/items", ItemsFlush)
+	router.GET("/items", JsonResponse(ItemsList))
+	router.GET("/items/:itemId", JsonResponse(ItemsGet))
+	router.PUT("/items", JsonResponse(ItemsPut))
+	router.DELETE("/items/:itemId", JsonResponse(ItemsDelete))
+	router.DELETE("/items", JsonResponse(ItemsFlush))
 
 	fmt.Printf("Listening on port %v...", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

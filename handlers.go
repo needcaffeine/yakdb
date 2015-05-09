@@ -11,6 +11,13 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+func JsonResponse(h httprouter.Handle) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		h(w, r, p)
+	}
+}
+
 // List out all the routes.
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprintln(
@@ -29,7 +36,6 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // List all the items in the system.
 func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	itemsCopy := GetItems()
@@ -40,7 +46,6 @@ func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 // Get an item.
 func ItemsGet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	item := FindOneItemById(ps.ByName("itemId"))
@@ -51,7 +56,6 @@ func ItemsGet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
@@ -86,7 +90,6 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 func ItemsDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	result := DeleteOneItemById(ps.ByName("itemId"))
@@ -94,7 +97,6 @@ func ItemsDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 func ItemsFlush(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 
 	result := FlushItems()
