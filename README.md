@@ -1,4 +1,4 @@
-yakdb [![Build Status](https://drone.io/github.com/needcaffeine/yakdb/status.png)](https://drone.io/github.com/needcaffeine/yakdb/latest)
+yakdb [![Build Status](https://travis-ci.org/needcaffeine/yakdb.svg?branch=master)](https://travis-ci.org/needcaffeine/yakdb)
 =====
 
 **yakdb** (**y**et **a**nother **k**ey-value **d**ata**b**ase) is a highly-performant in-memory key-value store written in Go.
