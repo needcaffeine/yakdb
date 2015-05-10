@@ -45,10 +45,10 @@ func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 }
 
 // Get an item.
-func ItemsGet(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func ItemsGet(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	item := FindOneItemById(ps.ByName("itemId"))
+	item := FindOneItemById(p.ByName("itemId"))
 
 	if err := json.NewEncoder(w).Encode(item); err != nil {
 		panic(err)
@@ -89,10 +89,10 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
-func ItemsDelete(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func ItemsDelete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	result := DeleteOneItemById(ps.ByName("itemId"))
+	result := DeleteOneItemById(p.ByName("itemId"))
 	json.NewEncoder(w).Encode(result)
 }
 
