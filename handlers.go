@@ -11,9 +11,11 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// This is our JSON response renderer that just sets the right content type.
 func JsonResponse(h httprouter.Handle) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+
 		h(w, r, p)
 	}
 }
@@ -34,12 +36,12 @@ func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	)
 }
 
-// List all the items in the system.
+// List all the items in the database.
 func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	itemsCopy := GetItems()
-	if err := json.NewEncoder(w).Encode(itemsCopy); err != nil {
+	data := items.GetItems()
+	if err := json.NewEncoder(w).Encode(data); err != nil {
 		panic(err)
 	}
 }
@@ -48,15 +50,16 @@ func ItemsList(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 func ItemsGet(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	item := FindOneItemById(p.ByName("itemId"))
+	data := items.FindOneItemById(p.ByName("itemId"))
 
-	if err := json.NewEncoder(w).Encode(item); err != nil {
+	if err := json.NewEncoder(w).Encode(data); err != nil {
 		panic(err)
 	}
 }
 
+// Add an item to the database.
 func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-
+	// Read in the json document supplied to us.
 	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		panic(err)
@@ -65,6 +68,7 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		panic(err)
 	}
 
+	// Decode the json document into an item.
 	var item Item
 	if err := json.Unmarshal(body, &item); err != nil {
 		w.WriteHeader(422)
@@ -76,10 +80,11 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// Ensure that we are passed an id and value.
 	if len(item.Id) > 0 && len(item.Value) > 0 {
 		item.Created = time.Now().Unix()
-		i := CreateOneItem(item)
+
+		data := items.CreateOneItem(item)
 		w.WriteHeader(http.StatusCreated)
 
-		if err := json.NewEncoder(w).Encode(i); err != nil {
+		if err := json.NewEncoder(w).Encode(data); err != nil {
 			panic(err)
 		}
 	} else {
@@ -89,16 +94,18 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	}
 }
 
+// Delete an item.
 func ItemsDelete(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	result := DeleteOneItemById(p.ByName("itemId"))
-	json.NewEncoder(w).Encode(result)
+	data := items.DeleteOneItemById(p.ByName("itemId"))
+	json.NewEncoder(w).Encode(data)
 }
 
+// Delete all items.
 func ItemsFlush(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	w.WriteHeader(http.StatusOK)
 
-	result := FlushItems()
+	result := items.FlushItems()
 	json.NewEncoder(w).Encode(result)
 }
