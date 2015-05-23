@@ -6,9 +6,15 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/dimfeld/httptreemux"
 )
+
+// Instantiate a global RWMutex. This is necessary because
+// map operations are not atomic. @TODO: Maybe this should
+// be a lock on an individual collection, or item.
+var lock = &sync.RWMutex{}
 
 func main() {
 	// Read in the supplied flags from the command line to determine the port.
@@ -18,13 +24,18 @@ func main() {
 	flag.Parse()
 	port := strconv.Itoa(portFlag)
 
-	router := httprouter.New()
+	router := httptreemux.New()
 	router.GET("/", Index)
-	router.GET("/items", JsonResponse(ItemsList))
-	router.GET("/items/:itemId", JsonResponse(ItemsGet))
-	router.PUT("/items", JsonResponse(ItemsPut))
-	router.DELETE("/items/:itemId", JsonResponse(ItemsDelete))
-	router.DELETE("/items", JsonResponse(ItemsFlush))
+	router.GET("/collections", JsonResponse(CollectionsList))
+	router.GET("/:collectionId", JsonResponse(CollectionsGet))
+	router.PUT("/:collectionId", JsonResponse(CollectionsPut))
+	router.DELETE("/:collectionId", JsonResponse(CollectionsDelete))
+
+	router.GET("/:collectionId/items", JsonResponse(ItemsList))
+	router.GET("/:collectionId/:itemId", JsonResponse(ItemsGet))
+	router.PUT("/:collectionId/:itemId", JsonResponse(ItemsPut))
+	router.DELETE("/:collectionId/:itemId", JsonResponse(ItemsDelete))
+	router.DELETE("/:collectionId/items", JsonResponse(ItemsFlush))
 
 	fmt.Printf("Listening on port %v...", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
