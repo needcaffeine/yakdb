@@ -12,9 +12,8 @@ import (
 )
 
 // Instantiate a global RWMutex. This is necessary because
-// map operations are not atomic. @TODO: Maybe this should
-// be a lock on an individual collection, or item.
-var lock = &sync.RWMutex{}
+// map operations are not atomic.
+var gMu = &sync.RWMutex{}
 
 func main() {
 	// Read in the supplied flags from the command line to determine the port.

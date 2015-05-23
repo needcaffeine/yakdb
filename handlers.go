@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	//"time"
 
 	"github.com/dimfeld/httptreemux"
 )
@@ -104,7 +103,6 @@ func ItemsPut(w http.ResponseWriter, r *http.Request, p map[string]string) {
 		collectionId := p["collectionId"]
 		itemId := p["itemId"]
 
-		//collection := collections.GetCollection(collectionId)
 		data := collections.AddItem(collectionId, itemId, document)
 
 		w.WriteHeader(http.StatusCreated)

@@ -1,10 +1,14 @@
 package main
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 // A collection of Items.
 type Collection struct {
 	Items map[string]Item `json:"items"`
+	cMu   sync.RWMutex
 }
 
 type Collections map[string]Collection
@@ -12,15 +16,15 @@ type Collections map[string]Collection
 var collections = make(Collections)
 
 func (collections Collections) ListCollections() Collections {
-	lock.RLock()
-	defer lock.RUnlock()
+	gMu.RLock()
+	defer gMu.RUnlock()
 
 	return collections
 }
 
 func (collections Collections) GetCollection(id string) Collection {
-	lock.RLock()
-	defer lock.RUnlock()
+	gMu.RLock()
+	defer gMu.RUnlock()
 
 	return collections[id]
 }
@@ -34,8 +38,8 @@ func (collections Collections) CreateEmptyCollection(id string) Collection {
 }
 
 func (collections Collections) AddItem(collectionId string, itemId string, data interface{}) interface{} {
-	lock.Lock()
-	defer lock.Unlock()
+	gMu.Lock()
+	defer gMu.Unlock()
 
 	collection, present := collections[collectionId]
 	if present == false {
@@ -53,8 +57,8 @@ func (collections Collections) AddItem(collectionId string, itemId string, data 
 }
 
 func (collections Collections) DeleteOneCollection(id string) Result {
-	lock.Lock()
-	defer lock.Unlock()
+	gMu.Lock()
+	defer gMu.Unlock()
 
 	delete(collections, id)
 
@@ -63,8 +67,8 @@ func (collections Collections) DeleteOneCollection(id string) Result {
 }
 
 func (collections Collections) FlushCollections() Result {
-	lock.Lock()
-	defer lock.Unlock()
+	gMu.Lock()
+	defer gMu.Unlock()
 
 	for k := range collections {
 		delete(collections, k)
@@ -75,15 +79,15 @@ func (collections Collections) FlushCollections() Result {
 }
 
 func (collection Collection) GetItems() Items {
-	lock.RLock()
-	defer lock.RUnlock()
+	collection.cMu.RLock()
+	defer collection.cMu.RUnlock()
 
 	return collection.Items
 }
 
 func (collection Collection) FindOneItemById(itemId string) Item {
-	lock.RLock()
-	defer lock.RUnlock()
+	collection.cMu.RLock()
+	defer collection.cMu.RUnlock()
 
 	i, present := collection.Items[itemId]
 	if present == false {
@@ -94,8 +98,8 @@ func (collection Collection) FindOneItemById(itemId string) Item {
 }
 
 func (collection Collection) DeleteOneItemById(itemId string) Result {
-	lock.Lock()
-	defer lock.Unlock()
+	collection.cMu.Lock()
+	defer collection.cMu.Unlock()
 
 	items := collection.Items
 	delete(items, itemId)
@@ -105,8 +109,8 @@ func (collection Collection) DeleteOneItemById(itemId string) Result {
 }
 
 func (collection Collection) FlushItems() Result {
-	lock.Lock()
-	defer lock.Unlock()
+	collection.cMu.Lock()
+	defer collection.cMu.Unlock()
 
 	items := collection.Items
 	for k := range items {
