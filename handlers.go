@@ -21,18 +21,14 @@ func JsonResponse(h httptreemux.HandlerFunc) httptreemux.HandlerFunc {
 
 // List out all the routes.
 func Index(w http.ResponseWriter, r *http.Request, _ map[string]string) {
-	fmt.Fprintln(
-		w,
-		"This is yakdb, a highly performant key-value store written in Go.\n\n"+
-			"Usage:\n"+
-			"------\n"+
-			"List all items: GET /items\n"+
-			"Get an item: GET /items/{itemid}\n"+
-			"Put an item: PUT /items\n"+
-			"Delete an item: DELETE /items/{itemid}\n"+
-			"Delete all items: DELETE /items\n\n"+
-			"More documentation: https://github.com/needcaffeine/yakdb",
-	)
+	data := map[string]interface{}{
+		"info": "This is yakdb, a highly performant in-memory key-value store.",
+		"docs": "https://github.com/needcaffeine/yakdb",
+	}
+
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		panic(err)
+	}
 }
 
 // List all the collections.
